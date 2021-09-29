@@ -32,6 +32,7 @@ class Pods:
         print ("Running Pods:")
         v1_pods = self.dyn_client.resources.get(api_version=self.api_version, kind=self.kind)
         pod_list = v1_pods.get()
+        print (type(pod_list ))
         for pod in pod_list.items:
             if self.filter == "ALL":
                 print("Name: " + pod.metadata.name + " Namespace: " + pod.metadata.namespace)
@@ -47,3 +48,18 @@ class Pods:
                 print("Name: " + pod.metadata.name + " Namespace: " + pod.metadata.namespace)
             elif self.filter in pod.metadata.namespace:
                 print(pod.metadata.name+ " Namespace: " + pod.metadata.namespace)
+
+    def getPodList(self, namespace="ALL"):
+        print ("Running Pods in Namespace [" + namespace + "]")
+        ret_list=[]
+        v1_pods = self.dyn_client.resources.get(api_version=self.api_version, kind=self.kind)
+        pod_list = v1_pods.get()
+        print (type(pod_list))
+        for pod in pod_list.items:
+            if namespace == "ALL":
+                print("Name: " + pod.metadata.name + " Namespace: " + pod.metadata.namespace)
+            elif namespace in pod.metadata.namespace:
+                print(pod.metadata.name+ " Namespace: " + pod.metadata.namespace)
+                ret_list.append(pod)
+        return ret_list
+        
