@@ -50,16 +50,17 @@ class Pods:
                 print(pod.metadata.name+ " Namespace: " + pod.metadata.namespace)
 
     def getPodList(self, namespace="ALL"):
-        print ("Running Pods in Namespace [" + namespace + "]")
+        #print ("Running Pods in Namespace [" + namespace + "]")
         ret_list=[]
         v1_pods = self.dyn_client.resources.get(api_version=self.api_version, kind=self.kind)
         pod_list = v1_pods.get()
-        print (type(pod_list))
+        #print (type(pod_list))
         for pod in pod_list.items:
             if namespace == "ALL":
-                print("Name: " + pod.metadata.name + " Namespace: " + pod.metadata.namespace)
+                #print("Name: " + pod.metadata.name + " Namespace: " + pod.metadata.namespace)
+                ret_list.append(pod)
             elif namespace in pod.metadata.namespace:
-                print(pod.metadata.name+ " Namespace: " + pod.metadata.namespace)
+                #print(pod.metadata.name+ " Namespace: " + pod.metadata.namespace)
                 ret_list.append(pod)
         return ret_list
         

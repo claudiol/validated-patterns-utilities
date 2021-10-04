@@ -40,3 +40,14 @@ class Namespace:
                 print(project.metadata.name)
             elif self.filter in project.metadata.name:
                 print(project.metadata.name)
+
+    def getList(self):
+        list = []
+        v1_projects = self.dyn_client.resources.get(api_version=self.api_version, kind=self.kind)
+        project_list = v1_projects.get()
+        for project in project_list.items:
+            if self.filter == "ALL":
+                list.append(project.metadata.name)
+            elif self.filter in project.metadata.name:
+                list.append(project.metadata.name)
+        return list

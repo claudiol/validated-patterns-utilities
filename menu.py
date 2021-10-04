@@ -20,7 +20,7 @@ import npyscreen
 
 def displayPods():
     # Create a Form
-    form = npyscreen.Form(name = "OpenShift Namespace Search",)
+    form = npyscreen.Form(name = "OpenShift POD Search",)
     # Add a entry widget
     filter = form.add(npyscreen.TitleText, name = "Enter namespace to search [ALL for all namespaces]: ")
     # Go ahead and get user input
@@ -37,19 +37,19 @@ def displayPods():
 
     # Create a Form to display results
     F = npyscreen.Form(name = "Validated Patterns App",)
-    t2 = F.add(npyscreen.BoxTitle, name="OpenShift Pods Found:", max_height=20)         
-    t2.entry_widget.scroll_exit = True
+    messages = []
+
     if len(pods) == 0:
-        message = "No pods found in namespace [" + filter.value + "]"
-        messages = []
-        messages.append(message)
-        t2.values = messages
+        messages.append(("No pods found in namespace", filter.value))
     else:
-        messages = []
         for item in pods:
-            message = item.metadata.name + " State: " + item.status.phase
-            messages.append(message)
-        t2.values = messages  
+            messages.append((item.metadata.name,item.status.phase))
+    t2 = F.add(npyscreen.GridColTitles,
+               name="OpenShift Pods Found:",
+               #col_width=60,
+               values=messages,
+               col_titles=['Pod Name', 'State'])         
+    t2.values = messages  
     F.edit()
 
 #
