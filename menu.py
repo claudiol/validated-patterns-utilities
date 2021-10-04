@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 # Python imports
 import curses
 import sys
@@ -79,28 +81,37 @@ def displayNameSpaces() :
     F.edit()
     
 
-menu = {'title' : 'Validated Pattern Menu',
-        'type' : 'menu',
-        'subtitle' : 'A Curses menu in Python'}
+def main():
+    try:
+        menu = {'title' : 'Validated Pattern Menu',
+                'type' : 'menu',
+                'subtitle' : 'A Curses menu in Python'}
 
-option_1 = {'title' : 'Display Openshift Namespaces',
-            'type' : 'namespaces'
-            }
+        option_1 = {'title' : 'Display Openshift Namespaces',
+                    'type' : 'namespaces'
+                    }
 
-option_2 = {'title' : 'Display Openshift Pods',
-            'type' : 'pods'
-            }
+        option_2 = {'title' : 'Display Openshift Pods',
+                    'type' : 'pods'
+                    }
 
-menu['options'] = [option_1, option_2]
+        menu['options'] = [option_1, option_2]
+        
+        m = CursesMenu(menu)
+        
+        while True:
+            selected_action = m.display()
+            
+            if selected_action['type'] == 'exitmenu':
+                break
+            elif selected_action['type'] == 'namespaces':
+                displayNameSpaces()
+            elif selected_action['type'] == 'pods':
+                displayPods()
+    except err:
+        # output error, and return with an error code
+        print (str(err))
 
-m = CursesMenu(menu)
 
-while True:
-    selected_action = m.display()
-
-    if selected_action['type'] == 'exitmenu':
-        break
-    elif selected_action['type'] == 'namespaces':
-        displayNameSpaces()
-    elif selected_action['type'] == 'pods':
-        displayPods()
+if __name__ == "__main__":
+    main()
