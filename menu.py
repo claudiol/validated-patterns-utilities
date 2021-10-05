@@ -18,7 +18,7 @@ import npyscreen
 # Define functions
 
 
-def displayPods():
+def validatePods():
     # Create a Form
     form = npyscreen.Form(name = "OpenShift POD Search",)
     # Add a entry widget
@@ -46,6 +46,40 @@ def displayPods():
             messages.append((item.metadata.name,item.status.phase))
     t2 = F.add(npyscreen.GridColTitles,
                name="OpenShift Pods Found:",
+               #col_width=60,
+               values=messages,
+               col_titles=['Pod Name', 'State'])         
+    t2.values = messages  
+    F.edit()
+    
+def displayPods():
+    # Create a Form
+    form = npyscreen.Form(name = "OpenShift POD Search",)
+    # Add a entry widget
+    filter = form.add(npyscreen.TitleText, name = "Enter namespace to search [ALL for all namespaces]: ")
+    # Go ahead and get user input
+    form.edit()
+    # Create a Namespace instance and pass the filter value.
+    if not filter.value:
+        instance = nspod.Pods("ALL")
+        # Get the list from OpenShift 
+        pods=instance.getPodList(filter.value)
+    else:
+        instance = nspod.Pods(filter.value)
+        # Get the list from OpenShift 
+        pods=instance.getPodList(filter.value)
+
+    # Create a Form to display results
+    F = npyscreen.Form(name = "Validated Patterns PODS in Namespace [" + filter.value + "]",)
+    messages = []
+
+    if len(pods) == 0:
+        messages.append(("No pods found in namespace", filter.value))
+    else:
+        for item in pods:
+            messages.append((item.metadata.name,item.status.phase))
+    t2 = F.add(npyscreen.GridColTitles,
+               name="OpenShift Pods Found in [" + filter.value + "]",
                #col_width=60,
                values=messages,
                col_titles=['Pod Name', 'State'])         
