@@ -63,7 +63,7 @@ def main():
         pod_list = pod_instance.getPodList("manuela-tst-all")
         for pod in pod_list:
             print("Running pod: " + pod.metadata.name + " State: " + pod.status.phase)
-    except err:
+    except Exception as err:
         # output error, and return with an error code
         print (str(err))
     

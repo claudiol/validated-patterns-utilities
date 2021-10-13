@@ -11,6 +11,8 @@ from openshift.dynamic import DynamicClient
 
 import namespace as ns
 import pod as nspod
+import validatedpattern as vp
+
 from cursesmenu import *
 #from cursDialog import *
 import npyscreen
@@ -51,7 +53,11 @@ def validatePods():
                col_titles=['Pod Name', 'State'])         
     t2.values = messages  
     F.edit()
-    
+
+#
+# displayPods - displays Pods in a specified OpenShift Namespaces
+# 
+
 def displayPods():
     # Create a Form
     form = npyscreen.Form(name = "OpenShift POD Search",)
@@ -87,7 +93,7 @@ def displayPods():
     F.edit()
 
 #
-# getNameSpaces - gets OpenShift Namespaces
+# displayNameSpaces - gets OpenShift Namespaces
 # 
 def displayNameSpaces() :
     # Create a Form
@@ -113,24 +119,70 @@ def displayNameSpaces() :
     else:
         t2.values = namespaces 
     F.edit()
-    
+
+#
+# displayPods - displays Pods in a specified OpenShift Namespaces
+# 
+
+def validateDataCenterNameSpaces():
+    # Create a Form
+    form = npyscreen.Form(name = "Validated Patterns OpenShift Datacenter Namespace Validation",)
+    # Add a entry widget
+    filter = form.add(npyscreen.TitleText, name = "Enter file name (e.g. /home/claudiol/values-datacenter.yaml) values file to validate: ")
+    # Go ahead and get user input
+    form.edit()
+    # Create a Namespace instance and pass the filter value.
+    if filter.value:
+        instance = vp.ValidatedPattern(filter.value)
+        instance.loadPatternValues()
+        # Get the list from OpenShift 
+        validated_list=instance.validateNameSpaces()
+
+    # Create a Form to display results
+    F = npyscreen.Form(name = "Validated Patterns Datacenter Namespace Validation",)
+    messages = []
+
+    if len(validated_list) == 0:
+        messages.append(("No namespaces found to validate in file: ", filter.value))
+    else:
+        for item in validated_list:
+            messages.append((item[0],item[1]))
+    t2 = F.add(npyscreen.GridColTitles,
+               name="OpenShift Namespacess Validated in [" + filter.value + "]",
+               #col_width=60,
+               values=messages,
+               col_titles=['Namespace', 'Validated Status'])         
+    t2.values = messages  
+    F.edit()
+
 
 def main():
     try:
+        kubeconfig = os.environ['KUBECONFIG']
+
+        if not kubeconfig:
+            raise Exception("KUBECONFIG environment variable not set. Please export KUBECONFIG=[kubeconfig file]")
+        
+        message = "Using kubeconfig [" + kubeconfig + "]"
         menu = {'title' : 'Validated Pattern Menu',
                 'type' : 'menu',
-                'subtitle' : 'A Curses menu in Python'}
+                'subtitle' : message
+                }
 
         option_1 = {'title' : 'Display Openshift Namespaces',
                     'type' : 'namespaces'
                     }
-
+        
         option_2 = {'title' : 'Display Openshift Pods',
                     'type' : 'pods'
                     }
 
-        menu['options'] = [option_1, option_2]
+        option_3 = {'title' : 'Validate Datacenter Namespaces',
+                    'type' : 'dc-namespaces'
+                    }
         
+        menu['options'] = [option_1, option_2, option_3]
+
         m = CursesMenu(menu)
         
         while True:
@@ -142,9 +194,14 @@ def main():
                 displayNameSpaces()
             elif selected_action['type'] == 'pods':
                 displayPods()
-    except err:
-        # output error, and return with an error code
-        print (str(err))
+            elif selected_action['type'] == 'dc-namespaces':
+                validateDataCenterNameSpaces()
+    except Exception as err:
+        if "KUBECONFIG" in str(err):
+            print ("KUBECONFIG environment variable not set. Please export KUBECONFIG=[kubeconfig file]")
+        else:
+            # output error, and return with an error code
+            print ("Exception: " + str(err))
 
 
 if __name__ == "__main__":
