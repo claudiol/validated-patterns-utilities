@@ -8,6 +8,9 @@ import yaml
 
 from yaml.loader import SafeLoader
 
+import namespace as ns
+from ocpoperator import *
+
 # Remove 1st argument from the
 # list of command line arguments
 argumentList = sys.argv[1:]
@@ -62,7 +65,7 @@ class ValidatedPattern:
     def getSiteSubscriptions(self):
         subscriptions = self.data[0]['site']['subscriptions']
         return subscriptions
-            
+    
     def printSiteArgoProjects(self):
         print("ArgoCD Projects: ")
         projects = self.data[0]['site']['projects']
@@ -73,7 +76,7 @@ class ValidatedPattern:
     def getSiteArgoProjects(self):
         projects = self.data[0]['site']['projects']
         return projects
-            
+    
     def printSiteArgoApplications(self):
         print("ArgoCD Applications: ")
         applications = self.data[0]['site']['applications']
@@ -84,6 +87,25 @@ class ValidatedPattern:
     def getSiteArgoApplications(self):
         applications = self.data[0]['site']['applications']
         return applications
+
+    def validateNameSpaces(self):
+        namespaceList = self.data[0]['site']['namespaces']
+
+        instance = ns.Namespace()
+        for namespace in namespaceList:
+            validated = instance.validate(namespace)
+            print ("Namespace [" + namespace + "] exists " + str(validated))
+            
+    def validateOperators(self):
+        operator_instance = Operators()
+        operator_list = operator_instance.getList()
+        for name in operator_list:
+            operatorName = name[0]
+            namespace = name[1]
+            validated = operator_instance.validate(operatorName, namespace)
+            print ("Operator[" + operatorName + "] exists in namespace [" + namespace + "] ===>" + str(validated))
+
+
 
             
 def usage():
@@ -96,14 +118,14 @@ def usage():
         "    Usage message"
     print(msg)
     exit()
-            
+    
 def main():
     try:
         # Parsing argument
         arguments, values = getopt.getopt(argumentList, options, long_options)
         if len(arguments) == 0:
             usage()
-        # checking each argument
+            # checking each argument
         for currentArgument, currentValue in arguments:            
             if currentArgument in ("-h", "--help"):
                 usage()
@@ -123,6 +145,8 @@ def main():
     pattern.printSiteSubscriptions()
     pattern.printSiteArgoProjects()
     pattern.printSiteArgoApplications()
+    pattern.validateNameSpaces()
+    pattern.validateOperators()
 
 if __name__ == "__main__":
     main()

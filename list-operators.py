@@ -5,7 +5,7 @@ from openshift.dynamic import DynamicClient
 import sys
 import getopt
 
-import operator as op
+from ocpoperator import *
 
 # Remove 1st argument from the
 # list of command line arguments
@@ -52,11 +52,12 @@ def main():
         usage()
 
     try:
-        operator_instance = op.Operators(filter)
+        operator_instance = Operators(filter)
         operator_instance.printList()
-    except err:
+        list = operator_instance.getList()
+    except Exception as err:
         # output error, and return with an error code
-        print (str(err))
+        print ("Exception occurred!" + str(err))
     
 if __name__ == "__main__":
     main()

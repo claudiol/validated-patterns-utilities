@@ -24,7 +24,7 @@ class Namespace:
     printList()
         Prints the list of namespaces
     """
-    def __init__(self, filter):
+    def __init__(self, filter="ALL"):
         # Initialize our variables
         self.api_version = 'project.openshift.io/v1'
         self.kind        = 'Project'
@@ -51,3 +51,11 @@ class Namespace:
             elif self.filter in project.metadata.name:
                 list.append(project.metadata.name)
         return list
+
+    def validate(self,namespace):
+        project_list = self.getList()
+        for project in project_list:
+            if project == namespace:
+                return True
+
+        return False
