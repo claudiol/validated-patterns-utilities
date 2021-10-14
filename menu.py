@@ -12,6 +12,7 @@ from openshift.dynamic import DynamicClient
 import namespace as ns
 import pod as nspod
 import validatedpattern as vp
+import pipelines as pipe
 
 from cursesmenu import *
 #from cursDialog import *
@@ -121,7 +122,7 @@ def displayNameSpaces() :
     F.edit()
 
 #
-# displayPods - displays Pods in a specified OpenShift Namespaces
+# validateDataCenterNameSpaces - validate OpenShift Namespaces found in values-datacenter.yaml file
 # 
 
 def validateDataCenterNameSpaces():
@@ -155,6 +156,72 @@ def validateDataCenterNameSpaces():
     t2.values = messages  
     F.edit()
 
+#
+# validateOperators - validate OpenShift Operators listed in values-datacenter.yaml file
+# 
+
+def validateDataCenterOperators():
+    # Create a Form
+    form = npyscreen.Form(name = "Validated Patterns OpenShift Datacenter Installed Operators Validation",)
+    # Add a entry widget
+    filter = form.add(npyscreen.TitleText, name = "Enter file name (e.g. /home/claudiol/values-datacenter.yaml) values file to validate: ")
+    # Go ahead and get user input
+    form.edit()
+    # Create a Namespace instance and pass the filter value.
+    if filter.value:
+        instance = vp.ValidatedPattern(filter.value)
+        instance.loadPatternValues()
+        # Get the list from OpenShift 
+        validated_list=instance.validateOperators()
+
+    # Create a Form to display results
+    F = npyscreen.Form(name = "Validated Patterns Datacenter Installed Operator Validation",)
+    messages = []
+
+    if len(validated_list) == 0:
+        messages.append(("No operators found to validate in file: ", filter.value))
+    else:
+        for item in validated_list:
+            messages.append((item[0], item[1], item[2]))
+    t2 = F.add(npyscreen.GridColTitles,
+               name="OpenShift Operators Validated in [" + filter.value + "]",
+               #col_width=60,
+               values=messages,
+               col_titles=['Operator', 'Namespace', 'Validated Status'])         
+    t2.values = messages  
+    F.edit()
+
+def displayPipelines():
+    # Create a Form
+    form = npyscreen.Form(name = "Validated Patterns Available Pipelines",)
+    # Add a entry widget
+    filter = form.add(npyscreen.TitleText, name = "Enter namespace to look for pipelines: ")
+    # Go ahead and get user input
+    form.edit()
+    # Create a Namespace instance and pass the filter value.
+    if filter.value:
+        instance = pipe.Pipelines(filter.value) 
+        # Get the list from OpenShift 
+        pipeline_list=instance.getList()
+
+    # Create a Form to display results
+    F = npyscreen.Form(name = "Validated Patterns Industrial Edge Pipelines",)
+    messages = []
+
+    if len(pipeline_list) == 0:
+        messages.append(("No pipelines found in namespace: ", filter.value))
+    else:
+        for item in pipeline_list:
+            messages.append((item[0], item[1]))
+    t2 = F.add(npyscreen.GridColTitles,
+               name="OpenShift Pipelines found in [" + filter.value + "]",
+               #col_width=60,
+               values=messages,
+               col_titles=['Pipeline Name', 'Namespace'])         
+    t2.values = messages  
+    F.edit()
+
+
 
 def main():
     try:
@@ -180,8 +247,16 @@ def main():
         option_3 = {'title' : 'Validate Datacenter Namespaces',
                     'type' : 'dc-namespaces'
                     }
-        
-        menu['options'] = [option_1, option_2, option_3]
+
+        option_4 = {'title' : 'Validate Datacenter Operators',
+                    'type' : 'dc-operators'
+                    }
+
+        option_5 = {'title' : 'Validate Datacenter Pipelines',
+                    'type' : 'dc-pipelines'
+                    }
+
+        menu['options'] = [option_1, option_2, option_3, option_4, option_5]
 
         m = CursesMenu(menu)
         
@@ -196,6 +271,10 @@ def main():
                 displayPods()
             elif selected_action['type'] == 'dc-namespaces':
                 validateDataCenterNameSpaces()
+            elif selected_action['type'] == 'dc-operators':
+                validateDataCenterOperators()
+            elif selected_action['type'] == 'dc-pipelines':
+                displayPipelines()
     except Exception as err:
         if "KUBECONFIG" in str(err):
             print ("KUBECONFIG environment variable not set. Please export KUBECONFIG=[kubeconfig file]")

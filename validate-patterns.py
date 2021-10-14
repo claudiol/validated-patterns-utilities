@@ -53,6 +53,5 @@ def main():
     pattern.printSiteArgoApplications()
     pattern.validateNameSpaces()
     pattern.validateOperators()
-
 if __name__ == "__main__":
     main()
