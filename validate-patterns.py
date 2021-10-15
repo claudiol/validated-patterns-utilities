@@ -52,6 +52,9 @@ def main():
     pattern.printSiteArgoProjects()
     pattern.printSiteArgoApplications()
     pattern.validateNameSpaces()
-    pattern.validateOperators()
+    list = pattern.validateOperators()
+
+    for operator in list:
+        print (operator[0], operator[1], operator[2]) 
 if __name__ == "__main__":
     main()

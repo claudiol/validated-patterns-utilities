@@ -94,11 +94,12 @@ class ValidatedPattern:
     def validateOperators(self):
         list = []
         operator_instance = Operators()
-        operator_list = operator_instance.getList()
-        for name in operator_list:
-            operatorName = name[0]
-            namespace = name[1]
-            validated = operator_instance.validate(operatorName, namespace)
+        #operator_list = operator_instance.getList()
+        operator_list = self.getSiteSubscriptions()
+        for operator in operator_list:
+            operatorName = operator['name'] 
+            namespace = (operator['namespace'] if 'namespace' in operator else "none" )
+            validated, namespace = operator_instance.validate(operatorName, namespace)
             list.append((operatorName, namespace, validated))
             #print ("Operator[" + operatorName + "] exists in namespace [" + namespace + "] ===>" + str(validated))
         return list

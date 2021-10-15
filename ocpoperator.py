@@ -52,6 +52,9 @@ class Operators:
     def validate(self, name, namespace):
       subscription_list = self.getList()
       for subscription in subscription_list:
-          if ( (subscription[0] == name) and (subscription[1] == namespace) ):
-              return True
-      return False
+          if namespace == 'none':
+            if ( subscription[0] == name  ):
+              return True, subscription[1]
+          elif ( (subscription[0] == name) and (subscription[1] == namespace) ):
+              return True, namespace
+      return False, namespace
