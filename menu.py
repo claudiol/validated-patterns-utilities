@@ -14,8 +14,7 @@ import pod as nspod
 import validatedpattern as vp
 import pipelines as pipe
 
-from cursesmenu import *
-#from cursDialog import *
+from cursesmenu import CursesMenu
 import npyscreen
 
 # Define functions

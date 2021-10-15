@@ -5,7 +5,7 @@ from openshift.dynamic import DynamicClient
 import sys
 import getopt
 
-from ocpoperator import *
+from ocpoperator import Operators
 
 # Remove 1st argument from the
 # list of command line arguments
@@ -55,6 +55,11 @@ def main():
         operator_instance = Operators(filter)
         operator_instance.printList()
         list = operator_instance.getList()
+        for operator in list:
+            operatorName = operator[0]
+            namespace = operator[1]
+            validated, namespace = operator_instance.validate(operatorName, namespace)
+            print ("Name: " + operatorName + " Namespace: " + namespace + " Validated: " + str(validated))
     except Exception as err:
         # output error, and return with an error code
         print ("Exception occurred!" + str(err))

@@ -3,7 +3,7 @@ import sys
 import getopt
 import yaml
 
-from validatedpattern import *
+from validatedpattern import ValidatedPattern
 
 # Remove 1st argument from the
 # list of command line arguments

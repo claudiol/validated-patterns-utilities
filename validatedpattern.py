@@ -9,7 +9,7 @@ import yaml
 from yaml.loader import SafeLoader
 
 import namespace as ns
-from ocpoperator import *
+from ocpoperator import Operators
 
 class ValidatedPattern:
     def __init__(self, file):
