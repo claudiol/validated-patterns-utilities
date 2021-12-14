@@ -1,14 +1,16 @@
 #!/bin/sh
 
+
 # Function log
 # Arguments:
 #   $1 are for the options for echo
 #   $2 is for the message
+#   \033[0K\r - Trailing escape sequence to leave output on the same line
 function log {
-    if [ "$2." == "." ]; then
-	echo -e "\033[1;36m$1\033[0m"
+    if [ -z "$2" ]; then
+        echo -e "\033[0K\r\033[1;36m$1\033[0m"
     else
-	echo -e $1 "\033[1;36m$2\033[0m"
+        echo -e $1 "\033[0K\r\033[1;36m$2\033[0m"
     fi
 }
 
@@ -40,6 +42,17 @@ if [ "$PENDING." != "." ]; then
     done
 fi
 
+NUMNODES=$(oc get nodes | grep -v NAME | wc -l)
+let READYNODES=0
+log -n "Waiting for all nodes to be ready "
+while [ $NUMNODES -ne $READYNODES ]
+do
+    log -n "Waiting for all nodes to be ready ..."
+    READYNODES=$(oc get nodes | grep -v NAME | grep -v NOTREADY | wc -l)
+    sleep 3
+    log -n "Waiting for all nodes to be ready "
+done
+echo "done."
 log "Getting the status of the nodes"
 oc get nodes
 
