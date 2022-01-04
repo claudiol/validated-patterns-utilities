@@ -45,10 +45,13 @@ fi
 NUMNODES=$(oc get nodes | grep -v NAME | wc -l)
 let READYNODES=0
 log -n "Waiting for all nodes to be ready "
-while [ $NUMNODES -ne $READYNODES ]
+while ( true )
 do
-    log -n "Waiting for all nodes to be ready ..."
     READYNODES=$(oc get nodes | grep -v NAME | grep -v NOTREADY | wc -l)
+    log -n "Waiting for all nodes to be ready [$READYNODES/$NUMNODES]..."
+    if [ $NUMNODES -eq $READYNODES ]; then
+	    break;
+    fi
     sleep 3
     log -n "Waiting for all nodes to be ready "
 done
