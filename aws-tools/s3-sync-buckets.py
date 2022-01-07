@@ -11,6 +11,10 @@ regions=['us-west-1', 'us-west-2', 'us-east-1', 'us-east-2']
 aws_access_key_id = os.environ['AWS_ACCESS_KEY_ID']
 aws_secret_access_key = os.environ['AWS_SECRET_ACCESS_KEY']
 
+if aws_access_key_id == "" or aws_secret_access_key == "":
+  print("Please make sure that you set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables for AWS access")
+  exit()
+
 
 # Remove 1st argument from the
 # list of command line arguments
