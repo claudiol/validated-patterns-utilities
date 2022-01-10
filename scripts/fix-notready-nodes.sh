@@ -47,7 +47,7 @@ let READYNODES=0
 log -n "Waiting for all nodes to be ready "
 while ( true )
 do
-    READYNODES=$(oc get nodes | grep -v NAME | grep -v NOTREADY | wc -l)
+    READYNODES=$(oc get nodes | grep -v NAME | grep -vi NOTREADY | wc -l)
     log -n "Waiting for all nodes to be ready [$READYNODES/$NUMNODES]..."
     if [ $NUMNODES -eq $READYNODES ]; then
 	    break;
@@ -59,5 +59,17 @@ echo "done."
 log "Getting the status of the nodes"
 oc get nodes
 
-log "You should be able to get to the OpenShift console using the following routes"
-oc get routes -n openshift-console
+while ( true )
+do
+  log -n "Waiting for routes ... "
+  oc get routes -n openshift-console > /dev/null 2>&1
+  if [ $? == 0 ]; then
+    echo "done"
+    echo "You should be able to get to the OpenShift console using the following routes"
+    oc get routes -n openshift-console 
+    break
+  fi
+  sleep 1
+  log -n "Waiting for routes     "
+  sleep 1
+done
