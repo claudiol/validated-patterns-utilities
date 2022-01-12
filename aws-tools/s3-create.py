@@ -9,8 +9,13 @@ import os
 import json
 
 regions=['us-west-1', 'us-west-2', 'us-east-1', 'us-east-2']
-aws_access_key_id = os.environ['AWS_ACCESS_KEY_ID']
-aws_secret_access_key = os.environ['AWS_SECRET_ACCESS_KEY']
+
+try:
+  aws_access_key_id = os.environ['AWS_ACCESS_KEY_ID']
+  aws_secret_access_key = os.environ['AWS_SECRET_ACCESS_KEY']
+except:
+  print("Please make sure that you set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables for AWS access")
+  exit()
 
 if aws_access_key_id == "" or aws_secret_access_key == "":
   print("Please make sure that you set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables for AWS access")
@@ -94,7 +99,9 @@ def create_bucket(s3, bucket_name, region, public=None):
     try:
         result = s3.create_bucket(Bucket=bucket_name, CreateBucketConfiguration={'LocationConstraint': region})
         if public:
-          arn="arn:aws:s3:::" + bucket_name + "/*"
+          arn=[]
+          arn.append("arn:aws:s3:::" + bucket_name)
+          arn.append("arn:aws:s3:::" + bucket_name + "/*")
           policy={
             "Version": "2012-10-17",
             "Statement": [
@@ -109,9 +116,49 @@ def create_bucket(s3, bucket_name, region, public=None):
           }
           # Convert the policy from JSON dict to string
           bucket_policy = json.dumps(policy)
-          getS3Client(region).put_bucket_policy(Bucket=bucket_name, Policy=bucket_policy)
-          
-        return result
+          myresult=getS3Client(region).put_bucket_policy(Bucket=bucket_name, Policy=bucket_policy)
+          AUTH_PUBLIC_ACL={ 
+                "Grantee": { 
+                  "Type": "Group", 
+                  "URI": "http://acs.amazonaws.com/groups/global/AuthenticatedUsers" 
+                }, 
+                "Permission": "READ_ACP"
+              }
+          AUTH_READ_PUBLIC_ACL={ 
+                "Grantee": { 
+                  "Type": "Group", 
+                  "URI": "http://acs.amazonaws.com/groups/global/AuthenticatedUsers" 
+                }, 
+                "Permission": "READ"
+              }
+          EVERYONE_PUBLIC_ACL={ 
+                "Grantee": { 
+                  "Type": "Group", 
+                  "URI": "http://acs.amazonaws.com/groups/global/AllUsers" 
+                }, 
+                "Permission": "READ_ACP"
+              }
+          EVERYONE_READ_PUBLIC_ACL={ 
+                "Grantee": { 
+                  "Type": "Group", 
+                  "URI": "http://acs.amazonaws.com/groups/global/AllUsers" 
+                }, 
+                "Permission": "READ"
+              }
+          bucket = s3.Bucket(bucket_name)
+          bucket_acl = s3.BucketAcl(bucket_name)
+          owner={}
+          owner['ID']=bucket_acl.grants[0]['Grantee']['ID']
+          owner['DisplayName']=bucket_acl.grants[0]['Grantee']['DisplayName']
+          bucket_acl.grants.append(AUTH_PUBLIC_ACL)
+          bucket_acl.grants.append(AUTH_READ_PUBLIC_ACL)
+          bucket_acl.grants.append(EVERYONE_PUBLIC_ACL)
+          bucket_acl.grants.append(EVERYONE_READ_PUBLIC_ACL)
+          mydict={}
+          mydict['Grants']=bucket_acl.grants
+          mydict['Owner']=owner
+          bucket_acl.put(AccessControlPolicy=mydict)
+          return result
     except ClientError as e:
         print("Could not create bucket [" + bucket_name + "]")
         print(e)
@@ -158,14 +205,14 @@ def main():
       print ("Missing required bucket name")
       usage()
     
-    #s3 = getS3Client(region)
+    s3Client = getS3Client(region)
     s3 = boto3.resource('s3')
     sns = getSNSClient(region)
-        
     result = create_bucket(s3, bucket, region, public)
 
     if result:
-      print (result)
+      print ("Bucket [" + bucket + "] created successfully")
+
       
 if __name__ == "__main__":
     main()
