@@ -28,61 +28,74 @@ class ValidatedPattern:
     # Prints the site configured in the ValidatePatterns values file
     #
     def printSite(self):
-        site = self.data[0]['site']['name']
-        print ("Pattern for: " + site)
+        site=""
+        key='site'
+        if key in self.data[0].keys():
+            site=self.data[0]['site']['name']
+            print ("Pattern for: ") # + site)
+        elif 'clusterGroup' in self.data[0].keys():
+            site=self.data[0]['clusterGroup']['name']
+            print ("Pattern for: " + site)
+
 
     def getSite(self):
-        site = self.data[0]['site']['name']
+        site=""
+        key='site'
+        if key in self.data[0].keys():
+            site = self.data[0]['site']['name']
+        elif 'clusterGroup' in self.data[0].keys():
+            site = self.data[0]['site']['name']
         return site
 
     #
     # Prints the site namespaces in the ValidatePatterns values file
     #            
     def printSiteNameSpaces(self):
-        print ("Namespaces: ")
-        namespaceList = self.data[0]['site']['namespaces']
+        print ("Namespaces: ") 
+        print(self.data[0].keys())
+        namespaceList = self.data[0]['global']['namespaces']
         for namespace in namespaceList:
             print (namespace)
 
     def getSiteNameSpaces(self):
-        namespaceList = self.data[0]['site']['namespaces']
+        namespaceList = self.data[0]['global']['namespaces']
         return namespaceList
 
     def printSiteSubscriptions(self):
         print("Site subscriptions: ")
-        subscriptions = self.data[0]['site']['subscriptions']
+        subscriptions = self.data[0]['global']['subscriptions']
         for sub in subscriptions:
             print ("Name: " + sub['name'] + " CSV: " + sub['csv'] + " Target Namespace: " + (sub['namespace'] if 'namespace' in sub else "none" ))
 
     def getSiteSubscriptions(self):
-        subscriptions = self.data[0]['site']['subscriptions']
+        subscriptions = self.data[0]['global']['subscriptions']
         return subscriptions
     
     def printSiteArgoProjects(self):
         print("ArgoCD Projects: ")
-        projects = self.data[0]['site']['projects']
+        projects = self.data[0]['global']['projects']
 
         for project in projects:
             print ("Name: " + project )
 
     def getSiteArgoProjects(self):
-        projects = self.data[0]['site']['projects']
+        projects = self.data[0]['global']['projects']
         return projects
     
     def printSiteArgoApplications(self):
         print("ArgoCD Applications: ")
-        applications = self.data[0]['site']['applications']
+        applications = self.data[0]['global']['applications']
 
         for application in applications:
             print ("Name: " + application['name'] )
 
     def getSiteArgoApplications(self):
-        applications = self.data[0]['site']['applications']
+        applications = self.data[0]['global']['applications']
         return applications
 
     def validateNameSpaces(self):
         list = []
-        namespaceList = self.data[0]['site']['namespaces']
+        namespaceList = self.data[0]['global']['namespaces']
 
         instance = ns.Namespace()
         for namespace in namespaceList:
@@ -94,7 +107,8 @@ class ValidatedPattern:
     def validateOperators(self):
         list = []
         operator_instance = Operators()
-        #operator_list = operator_instance.getList()
+        operator_list = operator_instance.getList()
+        print (operator_list)
         operator_list = self.getSiteSubscriptions()
         for operator in operator_list:
             operatorName = operator['name'] 
@@ -103,4 +117,24 @@ class ValidatedPattern:
             list.append((operatorName, namespace, validated))
             #print ("Operator[" + operatorName + "] exists in namespace [" + namespace + "] ===>" + str(validated))
         return list
+
+    def deleteNamespace(self, namespace):
+        instance = ns.Namespace()
+        instance.delete(namespace)
+
+    def deleteOperator(self, operator, namespace=None):
+        list = []
+        operator_instance = Operators()
+        if namespace == None:
+            print ("Removing Operator[" + operator + "] in namespace [openshift-operators]" )
+            operator_instance.delete(operator)
+        else:
+            print ("Removing Operator[" + operator + "] in namespace [" + namespace + "]" )
+            operator_instance.delete(operator, namespace)
+            #print ("Operator[" + operatorName + "] exists in namespace [" + namespace + "] ===>" + str(validated))
+
+    def listOperatorCSV(self):
+        list = []
+        operator_instance = Operators()
+        operator_instance.printCSV()
 

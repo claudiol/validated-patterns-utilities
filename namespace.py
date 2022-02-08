@@ -52,6 +52,14 @@ class Namespace:
                 list.append(project.metadata.name)
         return list
 
+    def delete(self, namespace):
+        try:
+            v1_projects = self.dyn_client.resources.get(api_version=self.api_version, kind=self.kind)
+            print("Deleting namespace [" + namespace + "]")
+            v1_projects.delete(name=namespace)
+        except:
+            pass
+        
     def validate(self,namespace):
         project_list = self.getList()
         for project in project_list:
