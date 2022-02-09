@@ -57,6 +57,7 @@ def main():
     for operator in list:
         print (operator[0], operator[1], operator[2]) 
 
+    list.append(["openshift-gitops", "openshift-operators", None])
     for operator in list:
       operatorName = operator[0]
       namespace = operator[1]
@@ -66,6 +67,7 @@ def main():
         pattern.deleteOperator(operatorName, namespace)
 
     nslist = pattern.getSiteNameSpaces()
+    nslist.append("openshift-gitops")
     for namespace in nslist:
         pattern.deleteNamespace(namespace)
 
