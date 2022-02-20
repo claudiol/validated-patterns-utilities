@@ -10,6 +10,7 @@ from yaml.loader import SafeLoader
 
 import namespace as ns
 from ocpoperator import Operators
+from ocpcsv import CSV
 
 class ValidatedPattern:
     def __init__(self, file):
@@ -53,49 +54,49 @@ class ValidatedPattern:
     def printSiteNameSpaces(self):
         print ("Namespaces: ") 
         print(self.data[0].keys())
-        namespaceList = self.data[0]['global']['namespaces']
+        namespaceList = self.data[0]['clusterGroup']['namespaces']
         for namespace in namespaceList:
             print (namespace)
 
     def getSiteNameSpaces(self):
-        namespaceList = self.data[0]['global']['namespaces']
+        namespaceList = self.data[0]['clusterGroup']['namespaces']
         return namespaceList
 
     def printSiteSubscriptions(self):
         print("Site subscriptions: ")
-        subscriptions = self.data[0]['global']['subscriptions']
+        subscriptions = self.data[0]['clusterGroup']['subscriptions']
         for sub in subscriptions:
             print ("Name: " + sub['name'] + " CSV: " + sub['csv'] + " Target Namespace: " + (sub['namespace'] if 'namespace' in sub else "none" ))
 
     def getSiteSubscriptions(self):
-        subscriptions = self.data[0]['global']['subscriptions']
+        subscriptions = self.data[0]['clusterGroup']['subscriptions']
         return subscriptions
     
     def printSiteArgoProjects(self):
         print("ArgoCD Projects: ")
-        projects = self.data[0]['global']['projects']
+        projects = self.data[0]['clusterGroup']['projects']
 
         for project in projects:
             print ("Name: " + project )
 
     def getSiteArgoProjects(self):
-        projects = self.data[0]['global']['projects']
+        projects = self.data[0]['clusterGroup']['projects']
         return projects
     
     def printSiteArgoApplications(self):
         print("ArgoCD Applications: ")
-        applications = self.data[0]['global']['applications']
+        applications = self.data[0]['clusterGroup']['applications']
 
         for application in applications:
             print ("Name: " + application['name'] )
 
     def getSiteArgoApplications(self):
-        applications = self.data[0]['global']['applications']
+        applications = self.data[0]['clusterGroup']['applications']
         return applications
 
     def validateNameSpaces(self):
         list = []
-        namespaceList = self.data[0]['global']['namespaces']
+        namespaceList = self.data[0]['clusterGroup']['namespaces']
 
         instance = ns.Namespace()
         for namespace in namespaceList:
@@ -133,8 +134,23 @@ class ValidatedPattern:
             operator_instance.delete(operator, namespace)
             #print ("Operator[" + operatorName + "] exists in namespace [" + namespace + "] ===>" + str(validated))
 
-    def listOperatorCSV(self):
+    def listCSVs(self, filter=None):
         list = []
-        operator_instance = Operators()
-        operator_instance.printCSV()
+        if filter == None:
+            filter = "ALL"
+        csv_instance = CSV(filter)
+        csv_instance.printCSV()
 
+    def getCSVs(self, name):
+        list = []
+        csv_instance = CSV(filter=name)
+        list = csv_instance.getList(name)
+        return list
+        
+    def deleteCSV(self, name):
+        list = []
+        csv_instance = CSV()
+        list = csv_instance.getList(name)
+        for csv in list:
+            csv_instance.delete(csv)
+        

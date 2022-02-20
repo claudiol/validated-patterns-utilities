@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 from kubernetes import client, config
 from openshift.dynamic import DynamicClient
 
@@ -5,7 +7,7 @@ from openshift.dynamic import DynamicClient
 import sys
 import getopt
 
-from ocpoperator import Operators
+from ocpcsv import CSV
 
 # Remove 1st argument from the
 # list of command line arguments
@@ -39,7 +41,7 @@ def main():
             if currentArgument in ("-h", "--help"):
                 usage()
             elif currentArgument in ("-f", "--filter"):
-                print ("Adding filter: ", currentValue, " to search for OpenShift Operators")
+                #print ("Adding filter: ", currentValue, " to search for OpenShift Operators")
                 filter=currentValue
                 break
             elif currentArgument in ("-a", "--all"):
@@ -52,15 +54,11 @@ def main():
         usage()
 
     try:
-        operator_instance = Operators(filter)
-        #operator_instance.printList()
-        operator_instance.printCRDList()
-        list = operator_instance.getList()
-        for operator in list:
-            operatorName = operator[0]
-            namespace = operator[1]
-            validated, namespace = operator_instance.validate(operatorName, namespace)
-            print ("Name: " + operatorName + " Namespace: " + namespace + " Validated: " + str(validated))
+        csv_instance = CSV(filter)
+        #crd_instance.printList()
+        list = csv_instance.getList()
+        for csv in list:
+            print ("Name: " + csv ) 
     except Exception as err:
         # output error, and return with an error code
         print ("Exception occurred!" + str(err))

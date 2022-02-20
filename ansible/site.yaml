@@ -1,0 +1,6 @@
+- name: Parsing values-datacenter YAML playbook
+  hosts: localhost
+  connection: local
+  roles:
+    - parse-datacenter
+

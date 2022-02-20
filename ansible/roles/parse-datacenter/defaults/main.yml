@@ -1,0 +1,3 @@
+---
+# defaults file for parse-datacenter
+pattern_repo_dir: "{{ lookup('env', 'PWD') }}"

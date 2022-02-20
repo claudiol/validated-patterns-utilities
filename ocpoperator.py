@@ -25,6 +25,7 @@ class Operators:
         self.api_version = 'operators.coreos.com/v1alpha1'
         self.kind        = 'Subscription'
         self.csvkind        = 'ClusterServiceVersion'
+        self.crdkind        = 'CustomResourceDefinition'
         self.k8s_client = config.new_client_from_config()
         self.dyn_client = DynamicClient(self.k8s_client)
         self.filter = filter
@@ -33,6 +34,7 @@ class Operators:
         print ("Installed CSVs:")
         v1_csvs = self.dyn_client.resources.get(api_version=self.api_version, kind=self.csvkind)
         csv_list = v1_csvs.get()
+        print(csv_list)
         for csv in csv_list.items:
             if self.filter == "ALL":
                 print("Name: " + csv.metadata.name + " Namespace: " + csv.metadata.namespace)
@@ -62,20 +64,50 @@ class Operators:
                 return list
         return list
 
+    def getCRDList(self, operator, namespace):
+        print ("Installed CSVs:")
+        v1_crds = self.dyn_client.resources.get(api_version=self.api_version, kind=self.crdkind)
+        crd_list = v1_crds.get()
+        list=[]
+        for crd in crd_list.items:
+            if (crd.metadata.name == operator) and (crd.metadata.namespace == namespace): 
+                print("Name: " + crd.metadata.name + " Namespace: " + crd.metadata.namespace)
+                list.append((crd.metadata.name, crd.metadata.namespace))
+                return list
+        return list
+
+    def printCRDList(self):
+        print ("Installed CSVs:")
+        v1_crds = self.dyn_client.resources.get(api_version=self.api_version, kind=self.crdkind)
+        crd_list = v1_crds.get()
+        list=[]
+        for crd in crd_list.items:
+            print (crd)
+            #if (crd.metadata.name == operator) and (crd.metadata.namespace == namespace): 
+                #print("Name: " + crd.metadata.name + " Namespace: " + crd.metadata.namespace)
+                #list.append((crd.metadata.name, crd.metadata.namespace))
+                #return list
+        #return list
+
     def delete(self, name, namespace=None):
         try:
             print ("Delete Operator")
             v1_subscriptions = self.dyn_client.resources.get(api_version=self.api_version, kind=self.kind)
             v1_csv = self.dyn_client.resources.get(api_version=self.api_version, kind=self.csvkind)
-            subscription_list = v1_subscriptions.get()
-            csv_list = self.getCSVList(name, namespace)
+            #subscription_list = v1_subscriptions.get()
+            
             if namespace == None:
                 namespace = 'openshift_operators'
-                v1_subscriptions.delete(name=name, namespace=namespace)
                 
+            csv_list = self.getCSVList(name, namespace)                            
             for csv in csv_list:
-                v1_csv.delete(name=csv[0], namespace=csv[1])
+                if csv[0] in name:
+                    print("Removing CSV ["+ csv[0] + "]")
+                    v1_csv.delete(name=csv[0], namespace=csv[1])
+
+            v1_subscriptions.delete(name=name, namespace=namespace)
         except:
+            print("Could not remove this operator")
             pass
         
     def getList(self):
@@ -84,7 +116,7 @@ class Operators:
         subscription_list = v1_subscriptions.get()
         #print(subscription_list)
         for subscription in subscription_list.items:
-            print(subscription.metadata)
+            #print(subscription.metadata)
             if self.filter == "ALL":
                 list.append((subscription.metadata.name, subscription.metadata.namespace))
             elif self.filter in subscription.metadata.name:

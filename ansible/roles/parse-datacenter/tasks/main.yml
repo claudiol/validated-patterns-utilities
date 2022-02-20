@@ -1,0 +1,60 @@
+---
+# tasks file for parse-datacenter
+#
+- name: Setting fact
+  tags: vp-operators, vp-namespaces
+  set_fact:
+    vpfile: "{{ pattern_repo_dir }}/values-datacenter.yaml" 
+
+- name: "Getting operators from {{ vpfile }}"
+  shell: "cat {{ vpfile }} | yq '.clusterGroup.subscriptions[].name'"
+  tags: vp-operators
+  register: operators
+
+- name: "Getting namespaces from {{ vpfile }}"
+  shell: "cat {{ vpfile }} | yq '.clusterGroup.namespaces[]'"
+  tags: vp-namespaces
+  register: namespaces
+
+- name: "Showing operators from {{ vpfile }}"
+  debug: msg="{{ item }}"
+  tags: vp-operators
+  with_items: "{{ operators.stdout_lines }}"
+
+- name: "Showing namespaces from {{ vpfile }}"
+  debug: msg="{{ item }}"
+  tags: vp-namespaces
+  with_items: "{{ namespaces.stdout_lines }}"
+
+- name: "Getting CSV for each operator"
+  shell: "oc get packagemanifest {{ item }} -o yaml | yq '.status.channels[].currentCSV'"
+  with_items: "{{ operators.stdout_lines }}"
+  tags: csv
+  register: csvlist
+
+- name: "Getting channel for each operator"
+  shell: "oc get packagemanifest {{ item }} -o yaml | yq '.status.channels[].name' "
+  with_items: "{{ operators.stdout_lines }}"
+  tags: channels
+  register: channels
+
+- name: Response
+  debug: msg="Operator {{ item['item'] }} Channel {{ item['stdout_lines'] }}"
+  tags: channels
+  with_items: "{{ channels.results }}"
+
+- name: Creating a file with content
+  lineinfile:
+    path: ./lester.txt
+    line: "Operator {{ item['item'] }} Channel {{ item['stdout_lines'] }}"
+    insertbefore: BOF
+  tags: content
+  with_items: "{{ channels.results }}"
+
+- name: Creating a file with content
+  lineinfile:
+    path: ./lester.txt
+    line: "Operator {{ item['item'] }} CSV {{ item['stdout_lines'] }}"
+    insertbefore: BOF
+  tags: content
+  with_items: "{{ csvlist.results }}"
