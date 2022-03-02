@@ -1,0 +1,71 @@
+{
+    "clusterGroup": {
+        "name": str,
+        "isHubCluster": bool,
+        "proposedOptions": {
+            Optional("manageGitops"): bool,
+            Optional("isHubCluster"): bool,
+        },
+        "namespaces": list,
+        Optional("operatorgroupExcludes"): list,
+        "subscriptions": [
+            {
+                "name": str,
+                Optional("namespace"): str,
+                Optional("source"): str,
+                Optional("channel"): str,
+                Optional("csv"): str
+            },
+        ],
+        "projects": list,
+        "applications": [
+            {
+                "name": str,
+                "namespace": str,
+                "project": str,
+                Optional("path"): str,
+                Optional("chart"): str,
+                Optional("targetRevision"): str,
+                Optional("kustomize"): bool,
+                Optional("repoURL"): str,
+                Optional("plugin"): {
+                    "name": str,
+                },
+                Optional("overrides"): [
+                    {
+                        "name": str,
+                        "value": Or(None, str),
+                        Optional("forceString"): bool,
+                    },
+                ],
+                Optional("ignoreDifferences"): [
+                    {
+                                "group": str,
+                                "kind": str,
+                                "jsonPointers": list,
+                    },
+                ],
+            },
+        ],
+        "managedClusterGroups": [
+            {
+                "name": str,
+                "helmOverrides": [
+                    {
+                        "name": str,
+                        "value": str,
+                    },
+                ],
+                "clusterSelector": {
+                    "matchExpressions": [
+                        {
+                            "key": str,
+                            "operator": str,
+                            "values": list,
+                        },
+                    ],
+                },
+            },
+        ],
+    }
+}
